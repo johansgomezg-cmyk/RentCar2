@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.rentcar.controller.CustomerController" spacing="12">
+    <Label text="Sample customer records" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    <TableView fx:id="customerTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="customerIdColumn" text="ID" prefWidth="110"/>
+            <TableColumn fx:id="customerNameColumn" text="Full name" prefWidth="190"/>
+            <TableColumn fx:id="customerEmailColumn" text="Email" prefWidth="240"/>
+            <TableColumn fx:id="customerAuthorizedColumn" text="Authorized" prefWidth="100"/>
+        </columns>
+    </TableView>
+</VBox>

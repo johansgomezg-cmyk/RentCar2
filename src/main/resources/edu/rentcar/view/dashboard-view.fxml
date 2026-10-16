@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.rentcar.controller.DashboardController" spacing="18">
+    <Label text="Welcome to RentCar" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    <Label text="Manage the vehicle fleet and explore the rental workflow starter." wrapText="true"/>
+    <HBox spacing="16">
+        <VBox spacing="8" prefWidth="220" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+            <Label text="Sample customers"/>
+            <Label fx:id="customerCountLabel" text="0" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #172b4d;"/>
+        </VBox>
+        <VBox spacing="8" prefWidth="220" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+            <Label text="Registered vehicles"/>
+            <Label fx:id="vehicleCountLabel" text="0" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #172b4d;"/>
+        </VBox>
+    </HBox>
+    <VBox spacing="8" style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 8;">
+        <Label text="Getting started" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Label text="The vehicle module is a working example of View, Controller, Service, Repository and Model." wrapText="true"/>
+        <Label text="The reservation workflow is intentionally incomplete and must be designed as part of the assignment." wrapText="true"/>
+    </VBox>
+</VBox>

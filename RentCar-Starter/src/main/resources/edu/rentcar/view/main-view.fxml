@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.rentcar.controller.MainController"
+            style="-fx-background-color: #f4f6f8;">
+    <left>
+        <VBox prefWidth="220" spacing="12" style="-fx-background-color: #172b4d; -fx-padding: 22;">
+            <Label text="RentCar" style="-fx-font-size: 25px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Rental Management" style="-fx-text-fill: #b9c7dc;"/>
+            <Separator style="-fx-opacity: 0.35;"/>
+            <Button text="Dashboard" onAction="#showDashboard" maxWidth="Infinity"
+                    style="-fx-alignment: CENTER_LEFT; -fx-background-color: #29466f; -fx-text-fill: white;"/>
+            <Button text="Customers" onAction="#showCustomers" maxWidth="Infinity"
+                    style="-fx-alignment: CENTER_LEFT; -fx-background-color: transparent; -fx-text-fill: white;"/>
+            <Button text="Vehicles" onAction="#showVehicles" maxWidth="Infinity"
+                    style="-fx-alignment: CENTER_LEFT; -fx-background-color: transparent; -fx-text-fill: white;"/>
+            <Button text="Reservations" onAction="#showReservations" maxWidth="Infinity"
+                    style="-fx-alignment: CENTER_LEFT; -fx-background-color: transparent; -fx-text-fill: white;"/>
+            <VBox VBox.vgrow="ALWAYS"/>
+            <Label text="PGII · Parcial 2" style="-fx-text-fill: #b9c7dc;"/>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="18" style="-fx-padding: 28;">
+            <Label fx:id="pageTitle" text="Dashboard"
+                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #172b4d;"/>
+            <StackPane fx:id="contentPane" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </center>
+</BorderPane>
