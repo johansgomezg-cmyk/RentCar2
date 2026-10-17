@@ -1,0 +1,54 @@
+
+classDiagram
+    direction TB
+
+    class PaymentGateway {
+        <<interface>>
+        +pay(PaymentOrder) PaymentResult
+    }
+
+    class PaymentApiAdapter {
+        -PaymentTransport transport
+        +PaymentApiAdapter(String)
+        +pay(PaymentOrder) PaymentResult
+    }
+
+    class PaymentTransport {
+        <<interface>>
+        +send(PaymentApiRequest) PaymentApiResponse
+    }
+
+    class PaymentOrder {
+        <<record>>
+        +String reservationId
+        +String customerId
+        +double amount
+        +String paymentToken
+    }
+
+    class PaymentResult {
+        <<record>>
+        +Status status
+        +String message
+    }
+
+    class PaymentApiClient {
+        <<external>>
+        +pay(PaymentApiRequest) PaymentApiResponse
+    }
+
+    class PaymentApiRequest {
+        <<external>>
+    }
+
+    class PaymentApiResponse {
+        <<external>>
+    }
+
+    PaymentGateway <|.. PaymentApiAdapter
+    PaymentApiAdapter --> PaymentTransport : delegates
+    PaymentApiAdapter ..> PaymentOrder : reads
+    PaymentApiAdapter ..> PaymentResult : creates
+    PaymentApiAdapter ..> PaymentApiClient : constructs
+    PaymentApiAdapter ..> PaymentApiRequest : maps
+    PaymentApiAdapter ..> PaymentApiResponse : interprets
