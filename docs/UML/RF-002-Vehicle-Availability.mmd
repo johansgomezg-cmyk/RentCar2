@@ -1,0 +1,41 @@
+
+classDiagram
+    direction LR
+
+    class VehicleAvailabilityService {
+        +isAvailable(String, LocalDate, LocalDate, List~Reservation~) boolean
+    }
+
+    class Reservation {
+        -String id
+        -String customerId
+        -String vehicleId
+        -LocalDate startDate
+        -LocalDate endDate
+        -String status
+        +getVehicleId() String
+        +getStartDate() LocalDate
+        +getEndDate() LocalDate
+        +getStatus() String
+    }
+
+    class StatusReservation {
+        <<enumeration>>
+        Pending
+        Confirmed
+        Finalized
+    }
+
+    VehicleAvailabilityService ..> Reservation : checks
+    VehicleAvailabilityService ..> StatusReservation : checks status
+
+
+    class ReservationService {
+        +createReservation(String, String, LocalDate, LocalDate) Reservation
+        +confirmReservation(String) Reservation
+        +findReservation(String) Reservation
+        +getAllReservations() List~Reservation~
+    }
+
+    ReservationService --> VehicleAvailabilityService : checks availability
+    ReservationService "1" -- "0..*" Reservation : manages
