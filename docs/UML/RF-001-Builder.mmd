@@ -1,0 +1,52 @@
+
+classDiagram
+    direction LR
+
+    class RentalRequest {
+        -String customerId
+        -String vehicleId
+        -LocalDate startDate
+        -LocalDate endDate
+        -Rentalmode rentalMode
+        -List~String~ serviceCodes
+        +getCustomerId() String
+        +getVehicleId() String
+        +getStartDate() LocalDate
+        +getEndDate() LocalDate
+        +getRentalMode() Rentalmode
+        +getServiceCodes() List~String~
+    }
+
+    class RentalRequestBuilder {
+        -String customerId
+        -String vehicleId
+        -LocalDate startDate
+        -LocalDate endDate
+        -Rentalmode rentalMode
+        -List~String~ serviceCodes
+        +customerId(String) RentalRequestBuilder
+        +vehicleId(String) RentalRequestBuilder
+        +dates(LocalDate,LocalDate) RentalRequestBuilder
+        +rentalMode(Rentalmode) RentalRequestBuilder
+        +addService(String) RentalRequestBuilder
+        +build() RentalRequest
+    }
+
+    class Rentalmode {
+        <<interface>>
+        +createTariffPolicy() TariffPolicy
+        +createCoveragePolicy() CoveragePolicy
+        +createAssistancePolicy() AssistancePolicy
+    }
+
+    class Economy
+    class Executive
+    class Premium
+
+    RentalRequestBuilder ..> RentalRequest : builds
+    RentalRequestBuilder --> Rentalmode : selects
+    RentalRequest --> Rentalmode : stores
+
+    Rentalmode <|.. Economy
+    Rentalmode <|.. Executive
+    Rentalmode <|.. Premium
