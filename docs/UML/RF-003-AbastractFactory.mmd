@@ -1,0 +1,67 @@
+
+classDiagram
+    direction TB
+
+    class RentalPricingService {
+        +calculateQuote(RentalRequest, Vehicle) RentalQuote
+    }
+
+    class RentalQuote {
+        <<record>>
+        +int rentalDays
+        +double rentalCost
+        +String coverageDescription
+        +String assistanceDescription
+    }
+
+    class RentalRequest {
+        -String vehicleId
+        -Rentalmode rentalMode
+        +getVehicleId() String
+        +getRentalMode() Rentalmode
+    }
+
+    class Vehicle {
+        +getId() String
+        +getDailyRate() double
+    }
+
+    class Rentalmode {
+        <<interface>>
+        +createTariffPolicy() TariffPolicy
+        +createCoveragePolicy() CoveragePolicy
+        +createAssistancePolicy() AssistancePolicy
+    }
+
+    class Economy
+    class Executive
+    class Premium
+
+    class TariffPolicy {
+        <<interface>>
+        +calculateCost(double, int) double
+    }
+
+    class CoveragePolicy {
+        <<interface>>
+        +gettextcoverage() String
+    }
+
+    class AssistancePolicy {
+        <<interface>>
+        +gettext() String
+    }
+
+    RentalPricingService ..> RentalRequest : uses
+    RentalPricingService ..> Vehicle : uses
+    RentalPricingService ..> RentalQuote : creates
+
+    RentalRequest --> Rentalmode : selects
+
+    Rentalmode <|.. Economy
+    Rentalmode <|.. Executive
+    Rentalmode <|.. Premium
+
+    Rentalmode ..> TariffPolicy : creates
+    Rentalmode ..> CoveragePolicy : creates
+    Rentalmode ..> AssistancePolicy : creates
