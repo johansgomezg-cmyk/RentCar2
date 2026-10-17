@@ -1,0 +1,47 @@
+
+classDiagram
+    direction TB
+
+    class RentalCharge {
+        <<interface>>
+        +rentalDays() int
+        +totalCost() double
+        +description() String
+    }
+
+    class BaseRentalCharge {
+        -RentalQuote quote
+        -String vehicleDescription
+        +rentalDays() int
+        +totalCost() double
+        +description() String
+    }
+
+    class ServiceChargeDecorator {
+        -RentalCharge wrappedCharge
+        -RentalServiceItem addedService
+        +rentalDays() int
+        +totalCost() double
+        +description() String
+    }
+
+    class RentalQuote {
+        <<record>>
+        +int rentalDays
+        +double rentalCost
+        +String coverageDescription
+        +String assistanceDescription
+    }
+
+    class RentalServiceItem {
+        <<interface>>
+        +description() String
+        +costForDays(int) double
+    }
+
+    RentalCharge <|.. BaseRentalCharge
+    RentalCharge <|.. ServiceChargeDecorator
+
+    BaseRentalCharge --> RentalQuote : uses
+    ServiceChargeDecorator --> RentalCharge : wraps
+    ServiceChargeDecorator --> RentalServiceItem : adds
