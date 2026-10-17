@@ -1,0 +1,112 @@
+classDiagram
+    direction LR
+
+    class Customer {
+      +String id
+      +String fullName
+      +boolean authorized
+    }
+    class Vehicle {
+      +String id
+      +double dailyRate
+      +String status
+    }
+    class RentalRequest {
+      +String customerId
+      +String vehicleId
+      +LocalDate startDate
+      +LocalDate endDate
+      +Rentalmode rentalMode
+      +List~ServiceComponent~ services
+    }
+    class ReservationBuilder {
+      +customerId(String) Builder
+      +vehicleId(String) Builder
+      +dates(LocalDate,LocalDate) Builder
+      +rentalMode(Rentalmode) Builder
+      +addService(ServiceComponent) Builder
+      +build() RentalRequest
+    }
+    class Reservation {
+      +String id
+      +ReservationStatus status
+      +double total
+    }
+    class ReservationService {
+      +save(Reservation) void
+      +findAll() List~Reservation~
+      +isAvailable(String,LocalDate,LocalDate) boolean
+    }
+    class RentalFacade {
+      +rent(RentalRequest,String) RentalResult
+    }
+    class Rentalmode {
+      <<interface>>
+      +createTariffPolicy() TariffPolicy
+      +createCoveragePolicy() CoveragePolicy
+      +createAssistancePolicy() AssistancePolicy
+    }
+    class Economy
+    class Executive
+    class Premium
+    class TariffPolicy {
+      <<interface>>
+      +calculateCost(double,int) double
+    }
+    class CoveragePolicy {
+      <<interface>>
+    }
+    class AssistancePolicy {
+      <<interface>>
+    }
+    class RentalQuote {
+      <<interface>>
+      +cost() double
+      +description() String
+    }
+    class BaseRentalQuote
+    class AdditionalServiceDecorator
+    class ServiceComponent {
+      <<interface>>
+      +cost(int) double
+      +description() String
+    }
+    class SingleService
+    class ServicePackage
+    class PaymentGateway {
+      <<interface>>
+      +pay(PaymentOrder) PaymentResult
+    }
+    class PaymentApiAdapter
+    class PaymentVerificationProxy
+    class CustomerVerificationService
+
+    Customer <-- RentalRequest : identifies
+    Vehicle <-- RentalRequest : selects
+    ReservationBuilder ..> RentalRequest : builds
+    RentalRequest --> Rentalmode : chooses
+    RentalRequest --> ServiceComponent : selects
+    Reservation --> RentalRequest : based on
+    RentalFacade --> ReservationService : saves/checks
+    RentalFacade --> PaymentGateway : pays
+    RentalFacade --> RentalQuote : calculates
+
+    Rentalmode <|.. Economy
+    Rentalmode <|.. Executive
+    Rentalmode <|.. Premium
+    Rentalmode ..> TariffPolicy : creates
+    Rentalmode ..> CoveragePolicy : creates
+    Rentalmode ..> AssistancePolicy : creates
+
+    RentalQuote <|.. BaseRentalQuote
+    RentalQuote <|.. AdditionalServiceDecorator
+    AdditionalServiceDecorator o-- RentalQuote : wraps
+    AdditionalServiceDecorator --> ServiceComponent : adds
+    ServiceComponent <|.. SingleService
+    ServiceComponent <|.. ServicePackage
+    ServicePackage o-- ServiceComponent : contains
+
+    PaymentGateway <|.. PaymentApiAdapter
+    PaymentGateway <|.. PaymentVerificationProxy
+    PaymentVerificationProxy --> PaymentGateway : delegates
+    PaymentVerificationProxy --> CustomerVerificationService : verifies
