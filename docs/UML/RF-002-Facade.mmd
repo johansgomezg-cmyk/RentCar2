@@ -1,0 +1,74 @@
+
+classDiagram
+    direction TB
+
+    class RentalFacade {
+        -ReservationService reservationService
+        -RentalPricingService pricingService
+        -VehicleAvailabilityService availabilityService
+        -PaymentGateway paymentGateway
+        +quote(RentalRequest) RentalEstimate
+        +checkout(RentalRequest, String) CheckoutResult
+    }
+
+    class ReservationService {
+        +createReservation(...) Reservation
+        ~confirmReservation(String) Reservation
+        ~markUnsuccessful(String, StatusReservation) Reservation
+        +getAllReservations() List~Reservation~
+    }
+
+    class RentalRequest
+    class RentalEstimate
+    class CheckoutResult {
+        <<record>>
+        +reservation() Reservation
+        +estimate() RentalEstimate
+        +payment() PaymentResult
+        +isConfirmed() boolean
+    }
+
+    class PaymentGateway {
+        <<interface>>
+        +pay(PaymentOrder) PaymentResult
+    }
+
+    class PaymentVerificationProxy
+    class PaymentApiAdapter
+    class PaymentOrder
+    class PaymentResult
+    class RentalPricingService
+    class VehicleAvailabilityService
+    class ServiceChargeDecorator
+    class RentalServiceItem
+    class Reservation
+    class StatusReservation {
+        <<enumeration>>
+        Pending
+        Confirmed
+        Finalized
+        PaymentDeclined
+        PaymentError
+    }
+
+    RentalFacade --> ReservationService
+    RentalFacade --> RentalPricingService
+    RentalFacade --> VehicleAvailabilityService
+    RentalFacade --> PaymentGateway
+    RentalFacade ..> RentalRequest : receives
+    RentalFacade ..> RentalEstimate : creates
+    RentalFacade ..> CheckoutResult : returns
+    RentalFacade ..> ServiceChargeDecorator : uses
+
+    CheckoutResult --> Reservation
+    CheckoutResult --> PaymentResult
+    CheckoutResult --> RentalEstimate
+
+    ReservationService --> Reservation : stores
+    Reservation --> StatusReservation : status
+
+    PaymentGateway <|.. PaymentVerificationProxy
+    PaymentGateway <|.. PaymentApiAdapter
+    PaymentVerificationProxy --> PaymentGateway : delegates
+    RentalFacade ..> PaymentOrder : creates
+    RentalFacade ..> RentalServiceItem : resolves
