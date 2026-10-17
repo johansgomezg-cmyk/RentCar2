@@ -11,6 +11,10 @@ import java.util.List;
 public class ReservationService {
 
     private final List<Reservation> reservations = new ArrayList<>();
+
+    private final VehicleAvailabilityService availabilityService =
+            new VehicleAvailabilityService();
+
     private int counter = 1;
 
     public Reservation createReservation(
@@ -19,88 +23,86 @@ public class ReservationService {
             LocalDate startDate,
             LocalDate endDate) {
 
-        if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException(
-                    "Las fechas son obligatorias.");
-        }
+        String validCustomerId = requireText(customerId, "Customer ID");
+        String validVehicleId = requireText(vehicleId, "Vehicle ID");
 
-        if (!startDate.isBefore(endDate)) {
-            throw new IllegalArgumentException(
-                    "La fecha de inicio debe ser antes de finalizar.");
-        }
-
-        if (!verificate(vehicleId, startDate, endDate)) {
+        if (!availabilityService.isAvailable(
+                validVehicleId, startDate, endDate, reservations)) {
             throw new IllegalStateException(
-                    "El carro ya está reservado en esa fecha.");
+                    "Vehicle is unavailable for these dates.");
         }
-
-        String reservationId = "RES-" + counter++;
 
         Reservation reservation = new Reservation(
-                reservationId,
-                customerId,
-                vehicleId,
+                "RES-" + counter++,
+                validCustomerId,
+                validVehicleId,
                 startDate,
                 endDate,
-                "PENDING"
+                StatusReservation.Pending.name()
         );
 
         reservations.add(reservation);
         return reservation;
     }
 
-    private boolean verificate(
-            String vehicleId,
-            LocalDate start,
-            LocalDate finish) {
+    public Reservation confirmReservation(String id) {
+        Reservation pending = findReservation(id);
 
-        for (Reservation r : reservations) {
-            if (r.getVehicleId().equals(vehicleId)) {
+        if (!StatusReservation.Pending.name().equals(pending.getStatus())) {
+            throw new IllegalStateException(
+                    "Only pending reservations can be confirmed.");
+        }
 
-                boolean cross =
-                        start.isBefore(r.getEndDate())
-                                && finish.isAfter(r.getStartDate());
+        // Exclude the reservation being confirmed.
+        List<Reservation> otherReservations = reservations.stream()
+                .filter(reservation -> !reservation.getId().equals(id))
+                .toList();
 
-                if (cross) {
-                    return false;
-                }
+        // Check availability again before changing the status.
+        if (!availabilityService.isAvailable(
+                pending.getVehicleId(),
+                pending.getStartDate(),
+                pending.getEndDate(),
+                otherReservations)) {
+            throw new IllegalStateException(
+                    "Vehicle is no longer available.");
+        }
+
+        Reservation confirmed = new Reservation(
+                pending.getId(),
+                pending.getCustomerId(),
+                pending.getVehicleId(),
+                pending.getStartDate(),
+                pending.getEndDate(),
+                StatusReservation.Confirmed.name()
+        );
+
+        reservations.set(reservations.indexOf(pending), confirmed);
+
+        return confirmed;
+    }
+
+    public Reservation findReservation(String id) {
+        for (Reservation reservation : reservations) {
+            if (reservation.getId().equals(id)) {
+                return reservation;
             }
         }
 
-        return true;
+        throw new IllegalArgumentException(
+                "Reservation not found: " + id);
     }
 
     public List<Reservation> getAllReservations() {
         return new ArrayList<>(reservations);
     }
 
-    public Reservation findReservation(String id) {
-        for (Reservation r : reservations) {
-            if (r.getId().equals(id)) {
-                return r;
-            }
+    private static String requireText(String text, String field) {
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException(
+                    field + " is required.");
         }
 
-        throw new IllegalArgumentException(
-                "No se encontró la reserva con ID: " + id);
-    }
-
-    public Reservation confirmReservation(String id) {
-
-        Reservation reserva = findReservation(id);
-
-        Reservation reservaConfirmada = new Reservation(
-                reserva.getId(),
-                reserva.getCustomerId(),
-                reserva.getVehicleId(),
-                reserva.getStartDate(),
-                reserva.getEndDate(),
-                StatusReservation.Confirmed.name()
-        );
-
-        int index = reservations.indexOf(reserva);
-        reservations.set(index, reservaConfirmada);
-
-        return reservaConfirmada;
+        return text.trim();
     }
 }
