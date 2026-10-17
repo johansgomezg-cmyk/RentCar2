@@ -10,26 +10,34 @@ import java.util.List;
 
 public class ReservationService {
 
-    private final List<Reservation> reservations = new ArrayList<>();
+    private final List<Reservation> reservations =
+            new ArrayList<>();
 
     private final VehicleAvailabilityService availabilityService =
             new VehicleAvailabilityService();
 
     private int counter = 1;
 
-    public Reservation createReservation(
+    public synchronized Reservation createReservation(
             String customerId,
             String vehicleId,
             LocalDate startDate,
             LocalDate endDate) {
 
-        String validCustomerId = requireText(customerId, "Customer ID");
-        String validVehicleId = requireText(vehicleId, "Vehicle ID");
+        String validCustomerId =
+                requireText(customerId, "Customer ID");
+
+        String validVehicleId =
+                requireText(vehicleId, "Vehicle ID");
 
         if (!availabilityService.isAvailable(
-                validVehicleId, startDate, endDate, reservations)) {
+                validVehicleId,
+                startDate,
+                endDate,
+                reservations)) {
+
             throw new IllegalStateException(
-                    "Vehicle is unavailable for these dates.");
+                    "Vehicle is unavailable.");
         }
 
         Reservation reservation = new Reservation(
@@ -45,44 +53,81 @@ public class ReservationService {
         return reservation;
     }
 
-    public Reservation confirmReservation(String id) {
+    // Package-private: not directly accessible to UI controllers.
+    synchronized Reservation confirmReservation(String id) {
+
         Reservation pending = findReservation(id);
 
-        if (!StatusReservation.Pending.name().equals(pending.getStatus())) {
+        if (!StatusReservation.Pending.name()
+                .equals(pending.getStatus())) {
+
             throw new IllegalStateException(
                     "Only pending reservations can be confirmed.");
         }
 
-        // Exclude the reservation being confirmed.
-        List<Reservation> otherReservations = reservations.stream()
-                .filter(reservation -> !reservation.getId().equals(id))
+        List<Reservation> others = reservations.stream()
+                .filter(r -> !r.getId().equals(id))
                 .toList();
 
-        // Check availability again before changing the status.
         if (!availabilityService.isAvailable(
                 pending.getVehicleId(),
                 pending.getStartDate(),
                 pending.getEndDate(),
-                otherReservations)) {
+                others)) {
+
             throw new IllegalStateException(
                     "Vehicle is no longer available.");
         }
 
-        Reservation confirmed = new Reservation(
-                pending.getId(),
-                pending.getCustomerId(),
-                pending.getVehicleId(),
-                pending.getStartDate(),
-                pending.getEndDate(),
-                StatusReservation.Confirmed.name()
-        );
-
-        reservations.set(reservations.indexOf(pending), confirmed);
-
-        return confirmed;
+        return replaceStatus(
+                pending, StatusReservation.Confirmed);
     }
 
-    public Reservation findReservation(String id) {
+    // Records a failed operation without confirming the reservation.
+    synchronized Reservation markUnsuccessful(
+            String id,
+            StatusReservation failureStatus) {
+
+        if (failureStatus != StatusReservation.PaymentDeclined
+                && failureStatus != StatusReservation.PaymentError) {
+
+            throw new IllegalArgumentException(
+                    "Invalid failure status.");
+        }
+
+        Reservation pending = findReservation(id);
+
+        if (!StatusReservation.Pending.name()
+                .equals(pending.getStatus())) {
+
+            throw new IllegalStateException(
+                    "Only pending reservations can be updated.");
+        }
+
+        return replaceStatus(pending, failureStatus);
+    }
+
+    private Reservation replaceStatus(
+            Reservation current,
+            StatusReservation newStatus) {
+
+        Reservation updated = new Reservation(
+                current.getId(),
+                current.getCustomerId(),
+                current.getVehicleId(),
+                current.getStartDate(),
+                current.getEndDate(),
+                newStatus.name()
+        );
+
+        int index = reservations.indexOf(current);
+        reservations.set(index, updated);
+
+        return updated;
+    }
+
+    public synchronized Reservation findReservation(String id) {
+
         for (Reservation reservation : reservations) {
             if (reservation.getId().equals(id)) {
                 return reservation;
@@ -93,16 +138,16 @@ public class ReservationService {
                 "Reservation not found: " + id);
     }
 
-    public List<Reservation> getAllReservations() {
-        return new ArrayList<>(reservations);
+    public synchronized List<Reservation> getAllReservations() {
+        return List.copyOf(reservations);
     }
 
-    private static String requireText(String text, String field) {
-        if (text == null || text.isBlank()) {
+    private static String requireText(String value, String field) {
+        if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(
                     field + " is required.");
         }
 
-        return text.trim();
+        return value.trim();
     }
 }
