@@ -11,9 +11,9 @@ public final class SampleData {
 
     public static List<Customer> customers() {
         return List.of(
-                new Customer("CUS-1001", "Sofia Martinez", "sofia.martinez@example.com", true),
-                new Customer("CUS-1002", "Daniel Rojas", "daniel.rojas@example.com", true),
-                new Customer("CUS-1003", "Valentina Torres", "valentina.torres@example.com", false)
+                new Customer("CUS-1001", "Luis Velez", "luis.velez@example.com", true),
+                new Customer("CUS-1002", "Johan Gomez", "johan.gomez@example.com", true),
+                new Customer("CUS-1003", "Daniel Monsalve", "daniel.monsalve@example.com", false)
         );
     }
 

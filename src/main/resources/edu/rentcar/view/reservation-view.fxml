@@ -1,12 +1,188 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.rentcar.controller.ReservationController" spacing="14">
-    <Label text="Rental reservation" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
-        <Label text="Reservation workflow" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-        <Label text="This screen is a starting point. The reservation workflow, request validation, availability, pricing, service packages and payment integration must be designed and implemented as part of the assignment." wrapText="true"/>
-        <Label text="No reservation is created by the starter application." style="-fx-text-fill: #64748b;"/>
-    </VBox>
-</VBox>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="edu.rentcar.controller.ReservationController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            style="-fx-background-color: transparent;">
+
+    <content>
+        <VBox spacing="14"
+              style="-fx-padding: 8; -fx-background-color: #f4f6f8;">
+
+            <Label text="Nueva reservación"
+                   style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #172b4d;"/>
+
+            <VBox spacing="12"
+                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 8;">
+
+                <Label text="1. Datos del alquiler"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <GridPane hgap="10" vgap="12">
+
+                    <Label text="Cliente"
+                           GridPane.rowIndex="0"
+                           GridPane.columnIndex="0"/>
+
+                    <ComboBox fx:id="customerCombo"
+                              prefWidth="240"
+                              GridPane.rowIndex="0"
+                              GridPane.columnIndex="1"/>
+
+                    <Label text="Vehículo"
+                           GridPane.rowIndex="1"
+                           GridPane.columnIndex="0"/>
+
+                    <ComboBox fx:id="vehicleCombo"
+                              prefWidth="320"
+                              GridPane.rowIndex="1"
+                              GridPane.columnIndex="1"/>
+
+                    <Label text="Fecha inicial"
+                           GridPane.rowIndex="2"
+                           GridPane.columnIndex="0"/>
+
+                    <DatePicker fx:id="startDatePicker"
+                                GridPane.rowIndex="2"
+                                GridPane.columnIndex="1"/>
+
+                    <Label text="Fecha final"
+                           GridPane.rowIndex="3"
+                           GridPane.columnIndex="0"/>
+
+                    <DatePicker fx:id="endDatePicker"
+                                GridPane.rowIndex="3"
+                                GridPane.columnIndex="1"/>
+
+                    <Label text="Modalidad"
+                           GridPane.rowIndex="4"
+                           GridPane.columnIndex="0"/>
+
+                    <ComboBox fx:id="modeCombo"
+                              prefWidth="240"
+                              GridPane.rowIndex="4"
+                              GridPane.columnIndex="1"/>
+
+                </GridPane>
+            </VBox>
+
+            <VBox spacing="12"
+                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 8;">
+
+                <Label text="2. Servicios adicionales"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="16">
+                    <CheckBox fx:id="gpsCheck"
+                              text="GPS"/>
+
+                    <CheckBox fx:id="childSeatCheck"
+                              text="Silla infantil"/>
+
+                    <CheckBox fx:id="extraDriverCheck"
+                              text="Conductor adicional"/>
+                </HBox>
+
+                <HBox spacing="16">
+                    <CheckBox fx:id="familyPackCheck"
+                              text="Paquete familiar"/>
+
+                    <CheckBox fx:id="completePackCheck"
+                              text="Paquete completo"/>
+                </HBox>
+
+                <Label text="Evita seleccionar paquetes y servicios repetidos: el sistema valida los duplicados."
+                       wrapText="true"
+                       style="-fx-text-fill: #64748b;"/>
+            </VBox>
+
+            <VBox spacing="12"
+                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 8;">
+
+                <Label text="3. Cotización"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <Button fx:id="quoteButton"
+                        text="Calcular cotización"
+                        onAction="#quoteRental"
+                        style="-fx-background-color: #2457a7; -fx-text-fill: white;"/>
+
+                <Label fx:id="quoteLabel"
+                       wrapText="true"
+                       style="-fx-font-size: 14px; -fx-text-fill: #172b4d;"/>
+            </VBox>
+
+            <VBox spacing="12"
+                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 8;">
+
+                <Label text="4. Pago de prueba"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Label text="Token:"/>
+
+                    <ComboBox fx:id="tokenCombo"
+                              prefWidth="200"/>
+
+                    <Button fx:id="payButton"
+                            text="Confirmar y pagar"
+                            onAction="#checkoutRental"
+                            disable="true"
+                            style="-fx-background-color: #16856c; -fx-text-fill: white;"/>
+
+                    <Button fx:id="clearButton"
+                            text="Limpiar"
+                            onAction="#clearForm"/>
+                </HBox>
+
+                <Label text="Solo para la API académica local. No introducir datos bancarios reales."
+                       style="-fx-text-fill: #64748b;"
+                       wrapText="true"/>
+
+                <Label fx:id="resultLabel"
+                       wrapText="true"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #172b4d;"/>
+            </VBox>
+
+            <VBox spacing="10"
+                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 8;">
+
+                <Label text="5. Historial de reservaciones"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+                <TableView fx:id="reservationTable"
+                           prefHeight="220">
+
+                    <columns>
+                        <TableColumn fx:id="idColumn"
+                                     text="Reserva"
+                                     prefWidth="85"/>
+
+                        <TableColumn fx:id="customerColumn"
+                                     text="Cliente"
+                                     prefWidth="95"/>
+
+                        <TableColumn fx:id="vehicleColumn"
+                                     text="Vehículo"
+                                     prefWidth="95"/>
+
+                        <TableColumn fx:id="startColumn"
+                                     text="Inicio"
+                                     prefWidth="100"/>
+
+                        <TableColumn fx:id="endColumn"
+                                     text="Fin"
+                                     prefWidth="100"/>
+
+                        <TableColumn fx:id="statusColumn"
+                                     text="Estado"
+                                     prefWidth="135"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

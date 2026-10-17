@@ -54,7 +54,19 @@ public class MainController {
             contentPane.getChildren().setAll(view);
             pageTitle.setText(title);
         } catch (IOException exception) {
-            showNavigationError("Could not load " + viewFile + ": " + exception.getMessage());
+
+            exception.printStackTrace();
+
+            Throwable cause = exception;
+
+            while (cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+
+            showNavigationError(
+                    "Could not load " + viewFile
+                            + "\nCause: " + cause
+            );
         }
     }
 

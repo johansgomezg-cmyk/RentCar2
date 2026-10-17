@@ -4,9 +4,8 @@
 
 ## 1. Integrantes
 
-- Nombre completo — código estudiantil
-- Nombre completo — código estudiantil
-- Nombre completo — código estudiantil (si aplica)
+- Luis Eduardo Vélez Posada - 1095550984
+- Johan Stiven Gómez - 1091885538
 
 ## 2. Descripción de la solución
 
