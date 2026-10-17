@@ -1,0 +1,52 @@
+
+classDiagram
+    direction TB
+
+    class PaymentGateway {
+        <<interface>>
+        +pay(PaymentOrder) PaymentResult
+    }
+
+    class PaymentVerificationProxy {
+        -CustomerAuthorizationService verificationService
+        -PaymentGateway realGateway
+        +pay(PaymentOrder) PaymentResult
+    }
+
+    class CustomerAuthorizationService {
+        <<interface>>
+        +isAuthorized(String) boolean
+    }
+
+    class InMemoryCustomerVerificationService {
+        -List~Customer~ customers
+        +isAuthorized(String) boolean
+    }
+
+    class PaymentApiAdapter {
+        +pay(PaymentOrder) PaymentResult
+    }
+
+    class Customer {
+        +getId() String
+        +isAuthorized() boolean
+    }
+
+    class PaymentOrder {
+        <<record>>
+    }
+
+    class PaymentResult {
+        <<record>>
+    }
+
+    PaymentGateway <|.. PaymentVerificationProxy
+    PaymentGateway <|.. PaymentApiAdapter
+
+    CustomerAuthorizationService <|.. InMemoryCustomerVerificationService
+
+    PaymentVerificationProxy --> CustomerAuthorizationService : verifies
+    PaymentVerificationProxy --> PaymentGateway : delegates if authorized
+    InMemoryCustomerVerificationService --> Customer : checks
+    PaymentVerificationProxy ..> PaymentOrder : receives
+    PaymentVerificationProxy ..> PaymentResult : returns
