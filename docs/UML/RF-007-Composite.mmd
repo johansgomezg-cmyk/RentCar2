@@ -1,0 +1,30 @@
+
+classDiagram
+    direction TB
+
+    class RentalServiceItem {
+        <<interface>>
+        +description() String
+        +costForDays(int) double
+    }
+
+    class IndividualService {
+        -String code
+        -String name
+        -double dailyRate
+        +description() String
+        +costForDays(int) double
+    }
+
+    class ServicePackage {
+        -String name
+        -List~RentalServiceItem~ components
+        +add(RentalServiceItem) ServicePackage
+        +getComponents() List~RentalServiceItem~
+        +description() String
+        +costForDays(int) double
+    }
+
+    RentalServiceItem <|.. IndividualService
+    RentalServiceItem <|.. ServicePackage
+    ServicePackage "1" -- "0..*" RentalServiceItem : contains
