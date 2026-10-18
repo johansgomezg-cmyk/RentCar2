@@ -2,94 +2,168 @@ classDiagram
     direction LR
 
     class Customer {
-      +String id
-      +String fullName
-      +boolean authorized
+        +getId() String
+        +isAuthorized() boolean
     }
     class Vehicle {
-      +String id
-      +double dailyRate
-      +String status
+        +getId() String
+        +getDailyRate() double
+        +getStatus() String
     }
     class RentalRequest {
-      +String customerId
-      +String vehicleId
-      +LocalDate startDate
-      +LocalDate endDate
-      +Rentalmode rentalMode
-      +List~ServiceComponent~ services
+        +getCustomerId() String
+        +getVehicleId() String
+        +getRentalMode() Rentalmode
+        +getServiceCodes() List~String~
     }
-    class ReservationBuilder {
-      +customerId(String) Builder
-      +vehicleId(String) Builder
-      +dates(LocalDate,LocalDate) Builder
-      +rentalMode(Rentalmode) Builder
-      +addService(ServiceComponent) Builder
-      +build() RentalRequest
+    class RentalRequestBuilder {
+        +customerId(String) RentalRequestBuilder
+        +vehicleId(String) RentalRequestBuilder
+        +dates(LocalDate, LocalDate) RentalRequestBuilder
+        +rentalMode(Rentalmode) RentalRequestBuilder
+        +addService(String) RentalRequestBuilder
+        +build() RentalRequest
     }
     class Reservation {
-      +String id
-      +ReservationStatus status
-      +double total
+        +getId() String
+        +getStatus() String
+    }
+    class StatusReservation {
+        <<enumeration>>
+        Pending
+        Confirmed
+        Finalized
+        PaymentDeclined
+        PaymentError
     }
     class ReservationService {
-      +save(Reservation) void
-      +findAll() List~Reservation~
-      +isAvailable(String,LocalDate,LocalDate) boolean
+        +createReservation(...) Reservation
+        ~confirmReservation(String) Reservation
+        ~markUnsuccessful(String, StatusReservation) Reservation
+        +getAllReservations() List~Reservation~
     }
+    class VehicleAvailabilityService {
+        +isAvailable(...) boolean
+    }
+    class VehicleService {
+        +getAllVehicles() List~Vehicle~
+        +registerVehicle(...) Vehicle
+    }
+    class VehicleRepository {
+        +findAll() List~Vehicle~
+    }
+
     class RentalFacade {
-      +rent(RentalRequest,String) RentalResult
+        +quote(RentalRequest) RentalEstimate
+        +checkout(RentalRequest, String) CheckoutResult
     }
+    class RentalPricingService {
+        +calculateQuote(RentalRequest, Vehicle) RentalQuote
+    }
+    class RentalQuote {
+        <<record>>
+        +rentalDays() int
+        +rentalCost() double
+    }
+    class RentalEstimate {
+        <<record>>
+        +totalCost() double
+    }
+    class CheckoutResult {
+        <<record>>
+        +isConfirmed() boolean
+    }
+
     class Rentalmode {
-      <<interface>>
-      +createTariffPolicy() TariffPolicy
-      +createCoveragePolicy() CoveragePolicy
-      +createAssistancePolicy() AssistancePolicy
+        <<interface>>
+        +createTariffPolicy() TariffPolicy
+        +createCoveragePolicy() CoveragePolicy
+        +createAssistancePolicy() AssistancePolicy
     }
     class Economy
     class Executive
     class Premium
     class TariffPolicy {
-      <<interface>>
-      +calculateCost(double,int) double
+        <<interface>>
+        +calculateCost(double,int) double
     }
     class CoveragePolicy {
-      <<interface>>
+        <<interface>>
+        +gettextcoverage() String
     }
     class AssistancePolicy {
-      <<interface>>
+        <<interface>>
+        +gettext() String
     }
-    class RentalQuote {
-      <<interface>>
-      +cost() double
-      +description() String
-    }
-    class BaseRentalQuote
-    class AdditionalServiceDecorator
-    class ServiceComponent {
-      <<interface>>
-      +cost(int) double
-      +description() String
-    }
-    class SingleService
-    class ServicePackage
-    class PaymentGateway {
-      <<interface>>
-      +pay(PaymentOrder) PaymentResult
-    }
-    class PaymentApiAdapter
-    class PaymentVerificationProxy
-    class CustomerVerificationService
 
-    Customer <-- RentalRequest : identifies
-    Vehicle <-- RentalRequest : selects
-    ReservationBuilder ..> RentalRequest : builds
-    RentalRequest --> Rentalmode : chooses
-    RentalRequest --> ServiceComponent : selects
-    Reservation --> RentalRequest : based on
-    RentalFacade --> ReservationService : saves/checks
-    RentalFacade --> PaymentGateway : pays
-    RentalFacade --> RentalQuote : calculates
+    class RentalCharge {
+        <<interface>>
+        +rentalDays() int
+        +totalCost() double
+        +description() String
+    }
+    class BaseRentalCharge {
+        <<record>>
+    }
+    class ServiceChargeDecorator {
+        +totalCost() double
+    }
+    class RentalServiceItem {
+        <<interface>>
+        +costForDays(int) double
+        +description() String
+    }
+    class IndividualService {
+        <<record>>
+    }
+    class ServicePackage {
+        +add(RentalServiceItem) ServicePackage
+        +getComponents() List~RentalServiceItem~
+    }
+    class RentalServiceCatalog {
+        +standardServices() Map
+    }
+
+    class PaymentGateway {
+        <<interface>>
+        +pay(PaymentOrder) PaymentResult
+    }
+    class PaymentOrder {
+        <<record>>
+    }
+    class PaymentResult {
+        <<record>>
+    }
+    class PaymentApiAdapter {
+        +pay(PaymentOrder) PaymentResult
+    }
+    class PaymentApiClient {
+        <<external>>
+        +pay(PaymentApiRequest) PaymentApiResponse
+    }
+    class PaymentVerificationProxy {
+        +pay(PaymentOrder) PaymentResult
+    }
+    class CustomerAuthorizationService {
+        <<interface>>
+        +isAuthorized(String) boolean
+    }
+    class InMemoryCustomerVerificationService {
+        +isAuthorized(String) boolean
+    }
+    class ApplicationServices {
+        +rentalFacade() RentalFacade
+        +reservationService() ReservationService
+    }
+    class ReservationController {
+        -quoteRental() void
+        -checkoutRental() void
+    }
+
+    RentalRequestBuilder ..> RentalRequest : constructs
+    RentalRequest --> Rentalmode : selects
+    RentalRequest ..> Customer : identifies by id
+    RentalRequest ..> Vehicle : identifies by id
 
     Rentalmode <|.. Economy
     Rentalmode <|.. Executive
@@ -98,15 +172,51 @@ classDiagram
     Rentalmode ..> CoveragePolicy : creates
     Rentalmode ..> AssistancePolicy : creates
 
-    RentalQuote <|.. BaseRentalQuote
-    RentalQuote <|.. AdditionalServiceDecorator
-    AdditionalServiceDecorator o-- RentalQuote : wraps
-    AdditionalServiceDecorator --> ServiceComponent : adds
-    ServiceComponent <|.. SingleService
-    ServiceComponent <|.. ServicePackage
-    ServicePackage o-- ServiceComponent : contains
+    RentalPricingService ..> RentalRequest : reads
+    RentalPricingService ..> RentalQuote : creates
+    RentalPricingService --> Rentalmode : uses
+    RentalPricingService ..> Vehicle : rates
+
+    RentalCharge <|.. BaseRentalCharge
+    RentalCharge <|.. ServiceChargeDecorator
+    BaseRentalCharge --> RentalQuote : wraps
+    ServiceChargeDecorator o-- RentalCharge : wraps
+    ServiceChargeDecorator --> RentalServiceItem : adds
+
+    RentalServiceItem <|.. IndividualService
+    RentalServiceItem <|.. ServicePackage
+    ServicePackage o-- RentalServiceItem : contains
+    RentalServiceCatalog ..> RentalServiceItem : supplies
+
+    ReservationService --> Reservation : stores
+    ReservationService --> VehicleAvailabilityService : checks
+    Reservation ..> StatusReservation : status
+    VehicleService --> VehicleRepository : uses
+    VehicleRepository --> Vehicle : stores
 
     PaymentGateway <|.. PaymentApiAdapter
     PaymentGateway <|.. PaymentVerificationProxy
+    PaymentVerificationProxy --> CustomerAuthorizationService : verifies
     PaymentVerificationProxy --> PaymentGateway : delegates
-    PaymentVerificationProxy --> CustomerVerificationService : verifies
+    CustomerAuthorizationService <|.. InMemoryCustomerVerificationService
+    InMemoryCustomerVerificationService --> Customer : reads
+    PaymentApiAdapter --> PaymentApiClient : uses library
+    PaymentApiAdapter ..> PaymentOrder : converts
+    PaymentApiAdapter ..> PaymentResult : returns
+
+    RentalFacade --> ReservationService : creates and confirms
+    RentalFacade --> VehicleAvailabilityService : checks
+    RentalFacade --> RentalPricingService : calculates
+    RentalFacade --> PaymentGateway : charges
+    RentalFacade ..> RentalCharge : decorates
+    ApplicationServices ..> RentalServiceCatalog : initializes catalog
+    RentalFacade ..> RentalEstimate : creates
+    RentalFacade ..> CheckoutResult : returns
+    CheckoutResult --> Reservation : summarizes
+    CheckoutResult --> RentalEstimate : includes
+    CheckoutResult --> PaymentResult : includes
+
+    ApplicationServices --> RentalFacade : constructs
+    ApplicationServices --> PaymentVerificationProxy : configures
+    ApplicationServices --> PaymentApiAdapter : configures
+    ReservationController --> ApplicationServices : obtains services
